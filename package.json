@@ -1,8 +1,8 @@
 {
   "name": "adonis5-memcached-client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Memcached client for AdonisJS 5",
-  "main": "build/providers/provider.js",
+  "main": "build/providers/AdonisMemcachedClientProvider.js",
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "dev": "tsc --watch",
