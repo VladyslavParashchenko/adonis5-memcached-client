@@ -273,10 +273,9 @@ await client.end()
 
 [typescript-url]:  "typescript"
 
-[comment]: <> ([npm-image]: https://img.shields.io/npm/v/.svg?style=for-the-badge&logo=npm)
+[npm-image]: https://img.shields.io/npm/v/adonis5-memcached-client.svg?style=for-the-badge&logo=npm
 
-[comment]: <> ([npm-url]: https://npmjs.org/package/ "npm")
+[npm-url]: https://npmjs.org/package/adonis5-memcached-client "npm"
 
-[comment]: <> ([license-image]: https://img.shields.io/npm/l/?color=blueviolet&style=for-the-badge)
-
+[license-image]: https://img.shields.io/npm/l/adonis5-memcached-client?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md "license"
