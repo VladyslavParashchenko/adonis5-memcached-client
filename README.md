@@ -39,7 +39,7 @@ Based on [Memcached](https://www.npmjs.com/package/memcached) and promisified fo
 # Installation
 
 ```bash
-npm i --save adonis5-cache
+npm i adonis5-memcached-client
 ```
 
 Install provider:
@@ -55,7 +55,7 @@ node ace invoke adonis5-memcached-client
 Import client from Adonis IoC and use it for getting access to the cache:
 
 ```js
- import MemcachedClient from '@ioc:Adonis/Addons/Adonis5-Cache'
+ import MemcachedClient from '@ioc:Adonis/Addons/Adonis5-MemcachedClient'
 
 export default class CacheRepository {
 	constructor() {
