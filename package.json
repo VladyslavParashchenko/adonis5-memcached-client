@@ -1,6 +1,6 @@
 {
   "name": "adonis5-memcached-client",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "Memcached client for AdonisJS 5",
   "main": "build/providers/AdonisMemcachedClientProvider.js",
   "scripts": {
