@@ -35,5 +35,5 @@ export default function (config: AdonisMemcachedClientConfig): AdonisMemcachedCl
 		client[methodName] = promisify(client[methodName])
 	}
 
-	return (client as any) as AdonisMemcachedClientContract
+	return client as any as AdonisMemcachedClientContract
 }

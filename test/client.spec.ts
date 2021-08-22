@@ -3,7 +3,7 @@ import buildClient from '../src/buildClient'
 import memcachedClientConfig from './fixtures/client-config'
 import MemcachedCallBackClient from 'memcached'
 import Memcached from 'memcached'
-import sleep from '../test-helpers/utils/sleep'
+import { sleep } from './utils'
 
 describe('AdonisMemcachedClient - client builder', () => {
 	let client: AdonisMemcachedClientContract
@@ -15,7 +15,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 	})
 
 	describe('get method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 'test-value', 60, () => {
 				done()
 			})
@@ -34,7 +34,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('ttl-test', 'test-value', 1, () => {
 					done()
 				})
@@ -50,7 +50,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 	})
 
 	describe('touch method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 'test-value', 60, () => {
 				done()
 			})
@@ -69,7 +69,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('ttl-test', 'test-value', 1, () => {
 					done()
 				})
@@ -85,7 +85,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 	})
 
 	describe('gets method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 'test-value', 60, () => {
 				done()
 			})
@@ -107,7 +107,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('ttl-test', 'test-value', 1, () => {
 					done()
 				})
@@ -123,7 +123,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 	})
 
 	describe('getMulti method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test-1', 'test-value', 60, () => {
 				callbackClient.set('test-2', 'test-value', 60, () => {
 					callbackClient.set('test-3', 'test-value', 60, () => {
@@ -152,7 +152,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('ttl-test-1', 'test-value', 1, () => {
 					callbackClient.set('ttl-test-2', 'test-value', 1, () => {
 						done()
@@ -170,7 +170,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 	})
 
 	describe('add method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 'test-value', 60, () => {
 				done()
 			})
@@ -182,51 +182,59 @@ describe('AdonisMemcachedClient - client builder', () => {
 			await expect(operation()).rejects.toThrow('Item is not stored')
 		})
 
-		test('should return true, new value added to cache', async (done) => {
+		test('should return true, new value added to cache', async () => {
 			const operation = async () => await client.add('new-key', 'new-test-value', 10)
 
 			await expect(operation()).resolves.toBeTruthy()
-			callbackClient.get('new-key', (_, value) => {
-				expect(value).toEqual('new-test-value')
-				done()
-			})
-		})
-
-		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
-				callbackClient.set('ttl-test', 'test-value', 1, () => {
-					done()
-				})
-			})
-
-			test('should add new key to cache, old record lifetime is over', async (done) => {
-				await sleep(1)
-				const operation = async () => await client.add('ttl-test', 'new-test-value', 10)
-
-				await expect(operation()).resolves.toBeTruthy()
+			return Promise.resolve((done) => {
 				callbackClient.get('new-key', (_, value) => {
 					expect(value).toEqual('new-test-value')
 					done()
 				})
 			})
 		})
+
+		describe('when lifetime is over', () => {
+			beforeEach((done) => {
+				callbackClient.set('ttl-test', 'test-value', 1, () => {
+					done()
+				})
+			})
+
+			test('should add new key to cache, old record lifetime is over', async () => {
+				await sleep(1)
+				const operation = async () => await client.add('ttl-test', 'new-test-value', 10)
+
+				await expect(operation()).resolves.toBeTruthy()
+
+				return Promise.resolve((done) => {
+					callbackClient.get('new-key', (_, value) => {
+						expect(value).toEqual('new-test-value')
+						done()
+					})
+				})
+			})
+		})
 	})
 
 	describe('cas method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 'test-value', 60, () => {
 				done()
 			})
 		})
 
-		test('should replace value in cache', async (done) => {
+		test('should replace value in cache', async () => {
 			const { cas } = <{ cas: string }>await client.gets('test')
 
 			const result = await client.cas('test', 'new-value', cas, 100)
 			expect(result).toEqual(true)
-			callbackClient.get('test', (_, value: string) => {
-				expect(value).toEqual('new-value')
-				done()
+
+			return Promise.resolve((done) => {
+				callbackClient.get('test', (_, value: string) => {
+					expect(value).toEqual('new-value')
+					done()
+				})
 			})
 		})
 
@@ -235,31 +243,35 @@ describe('AdonisMemcachedClient - client builder', () => {
 			expect(result).toBeUndefined()
 		})
 
-		test('should not write new value to the cache, cas is not correct', async (done) => {
+		test('should not write new value to the cache, cas is not correct', async () => {
 			const result = await client.cas('test', 'new-value', '0', 100)
 
 			expect(result).toEqual(false)
-			callbackClient.get('test', (_, value: string) => {
-				expect(value).toEqual('test-value')
-				done()
+			return Promise.resolve((done) => {
+				callbackClient.get('test', (_, value: string) => {
+					expect(value).toEqual('test-value')
+					done()
+				})
 			})
 		})
 	})
 
 	describe('append method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 'test-value', 60, () => {
 				done()
 			})
 		})
 
-		test('should append value to value, which stored in cache', async (done) => {
+		test('should append value to value, which stored in cache', async () => {
 			const operationResult = await client.append('test', '-postfix')
 			expect(operationResult).toBeTruthy()
 
-			callbackClient.get('test', (_, value) => {
-				expect(value).toEqual('test-value-postfix')
-				done()
+			return Promise.resolve((done) => {
+				callbackClient.get('test', (_, value) => {
+					expect(value).toEqual('test-value-postfix')
+					done()
+				})
 			})
 		})
 
@@ -270,7 +282,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('ttl-test', 'test-value', 1, () => {
 					done()
 				})
@@ -286,19 +298,21 @@ describe('AdonisMemcachedClient - client builder', () => {
 	})
 
 	describe('prepend method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 'test-value', 60, () => {
 				done()
 			})
 		})
 
-		test('should prepend value to value, which stored in cache', async (done) => {
+		test('should prepend value to value, which stored in cache', async () => {
 			const operationResult = await client.prepend('test', 'prefix-')
 			expect(operationResult).toBeTruthy()
 
-			callbackClient.get('test', (_, value) => {
-				expect(value).toEqual('prefix-test-value')
-				done()
+			return Promise.resolve((done) => {
+				callbackClient.get('test', (_, value) => {
+					expect(value).toEqual('prefix-test-value')
+					done()
+				})
 			})
 		})
 
@@ -309,7 +323,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('ttl-test', 'test-value', 1, () => {
 					done()
 				})
@@ -324,40 +338,44 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when cache value is number', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('test', 25, 60, () => {
 					done()
 				})
 			})
 
-			test('should prepend value to numeric value in cache, NaN as result', async (done) => {
+			test('should prepend value to numeric value in cache, NaN as result', async () => {
 				await sleep(1)
 				const operation = async () => await client.prepend('test', 'prefix')
 
 				await expect(operation()).resolves.toBeTruthy()
 
-				callbackClient.get('test', (_, value) => {
-					expect(value).toBeNaN()
-					done()
+				return Promise.resolve((done) => {
+					callbackClient.get('test', (_, value) => {
+						expect(value).toBeNaN()
+						done()
+					})
 				})
 			})
 		})
 	})
 
 	describe('incr method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 100, 60, () => {
 				done()
 			})
 		})
 
-		test('should increment value to value, which stored in cache', async (done) => {
+		test('should increment value to value, which stored in cache', async () => {
 			const operationResult = await client.incr('test', 100)
 			expect(operationResult).toEqual(200)
 
-			callbackClient.get('test', (_, value) => {
-				expect(value).toEqual(200)
-				done()
+			return Promise.resolve((done) => {
+				callbackClient.get('test', (_, value) => {
+					expect(value).toEqual(200)
+					done()
+				})
 			})
 		})
 
@@ -368,7 +386,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('ttl-test', 'test-value', 1, () => {
 					done()
 				})
@@ -383,7 +401,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when value in cache is not string', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('string-value', 'test-value', 100, () => {
 					done()
 				})
@@ -399,19 +417,21 @@ describe('AdonisMemcachedClient - client builder', () => {
 	})
 
 	describe('decr method', () => {
-		beforeEach(async (done) => {
+		beforeEach((done) => {
 			callbackClient.set('test', 100, 60, () => {
 				done()
 			})
 		})
 
-		test('should decrement value to value, which stored in cache', async (done) => {
+		test('should decrement value to value, which stored in cache', async () => {
 			const operationResult = await client.decr('test', 100)
 			expect(operationResult).toEqual(0)
 
-			callbackClient.get('test', (_, value) => {
-				expect(value).toEqual(0)
-				done()
+			return Promise.resolve((done) => {
+				callbackClient.get('test', (_, value) => {
+					expect(value).toEqual(0)
+					done()
+				})
 			})
 		})
 
@@ -422,7 +442,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when lifetime is over', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('ttl-test', 'test-value', 1, () => {
 					done()
 				})
@@ -437,7 +457,7 @@ describe('AdonisMemcachedClient - client builder', () => {
 		})
 
 		describe('when value in cache is not string', () => {
-			beforeEach(async (done) => {
+			beforeEach((done) => {
 				callbackClient.set('string-value', 'test-value', 100, () => {
 					done()
 				})
@@ -459,14 +479,16 @@ describe('AdonisMemcachedClient - client builder', () => {
 			})
 		})
 
-		test('should remove value from cache', async (done) => {
+		test('should remove value from cache', async () => {
 			const operationResult = await client.del('test')
 			expect(operationResult).toBeTruthy()
 
-			callbackClient.get('test', (err, value) => {
-				expect(err).toBeUndefined()
-				expect(value).toBeUndefined()
-				done()
+			return Promise.resolve((done) => {
+				callbackClient.get('test', (err, value) => {
+					expect(err).toBeUndefined()
+					expect(value).toBeUndefined()
+					done()
+				})
 			})
 		})
 
@@ -586,15 +608,17 @@ describe('AdonisMemcachedClient - client builder', () => {
 			})
 		})
 
-		test('should remove all values from cache using flush command', async (done) => {
+		test('should remove all values from cache using flush command', async () => {
 			const operationResult = await client.flush()
 			expect(operationResult).toEqual([true])
 
-			callbackClient.get('test-key-1', (_: unknown, dataByKey1: string | undefined) => {
-				expect(dataByKey1).toBeUndefined()
-				callbackClient.get('test-key-2', (__: unknown, dataByKey2: string | undefined) => {
-					expect(dataByKey2).toBeUndefined()
-					done()
+			return Promise.resolve((done) => {
+				callbackClient.get('test-key-1', (_: unknown, dataByKey1: string | undefined) => {
+					expect(dataByKey1).toBeUndefined()
+					callbackClient.get('test-key-2', (__: unknown, dataByKey2: string | undefined) => {
+						expect(dataByKey2).toBeUndefined()
+						done()
+					})
 				})
 			})
 		})

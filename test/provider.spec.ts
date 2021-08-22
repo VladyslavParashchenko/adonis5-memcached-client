@@ -1,8 +1,9 @@
-import { AdonisApplication } from '../test-helpers/TestAdonisApp'
 import memcachedClientConfig from './fixtures/client-config'
 import AdonisMemcachedClientProvider from '../providers/AdonisMemcachedClientProvider'
 import { mocked } from 'ts-jest/utils'
 import buildClient from '../src/buildClient'
+import AdonisApplication from 'adonis-provider-tester'
+
 jest.mock('../src/buildClient', () => {
 	return jest.fn()
 })
@@ -12,7 +13,7 @@ describe('Adonis memcached client provider test', () => {
 
 	beforeEach(async () => {
 		jest.clearAllMocks()
-		app = await new AdonisApplication([], [])
+		app = await new AdonisApplication()
 			.registerProvider(AdonisMemcachedClientProvider)
 			.registerAppConfig({ configName: 'memcached', appConfig: memcachedClientConfig })
 			.loadApp()

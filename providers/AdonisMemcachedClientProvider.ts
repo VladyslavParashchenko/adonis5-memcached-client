@@ -1,10 +1,17 @@
 import { ConfigContract } from '@ioc:Adonis/Core/Config'
 import buildClient from '../src/buildClient'
 import { AdonisMemcachedClientContract } from '@ioc:Adonis/Addons/Adonis5-MemcachedClient'
+import { Application } from '@adonisjs/application'
 import { IocContract } from '@adonisjs/fold'
+import { ContainerBindings } from '@ioc:Adonis/Core/Application'
 
 export default class AdonisMemcachedClientProvider {
-	constructor(protected container: IocContract) {}
+	public static needsApplication: true
+	private container: IocContract<ContainerBindings>
+
+	constructor({ container }: Application) {
+		this.container = container
+	}
 
 	public register(): void {
 		this.container.singleton('Adonis/Addons/Adonis5-MemcachedClient', () => {
